@@ -16,6 +16,9 @@ matplotlib = "^3.8.4"
 seaborn = "^0.13.2"
 tensorflow = "^2.16.1"
 keras = "^3.3.3"
+torch = "^2.3.0"
+torchvision = "^0.18.0"
+torchaudio = "^2.3.0"
 
 
 [build-system]
