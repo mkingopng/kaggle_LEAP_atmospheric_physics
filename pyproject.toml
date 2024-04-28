@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "kaggle-leap-atmospheric-physics"
+version = "0.1.0"
+description = "kaggle LEAP competition 2024"
+package-mode = false
+authors = ["Michael Kingston <71872141+mkingopng@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+kaggle = "^1.6.12"
+polars = "^0.20.22"
+pandas = "^2.2.2"
+jupyter = "^1.0.0"
+matplotlib = "^3.8.4"
+seaborn = "^0.13.2"
+tensorflow = "^2.16.1"
+keras = "^3.3.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
