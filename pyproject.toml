@@ -19,6 +19,11 @@ keras = "^3.3.3"
 torch = "^2.3.0"
 torchvision = "^0.18.0"
 torchaudio = "^2.3.0"
+xgboost = "^2.0.3"
+scikit-learn = "^1.4.2"
+pyarrow = "^16.0.0"
+boto3 = "^1.34.97"
+dask = {extras = ["dataframe"], version = "^2024.4.2"}
 
 
 [build-system]

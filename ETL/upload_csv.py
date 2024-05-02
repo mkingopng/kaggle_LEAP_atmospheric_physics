@@ -1,5 +1,5 @@
 """
-
+upload 180gb kaggle comp file to S3 buscket
 """
 import boto3
 import os
@@ -49,7 +49,7 @@ def upload_file_to_s3(file_name, bucket, object_name=None):
     return True
 
 # Example usage
-file_name = './../data/train.csv'
+file_name = '../data/train.csv'
 bucket_name = 'csvtoparquet1'
 
 success = upload_file_to_s3(file_name, bucket_name)
