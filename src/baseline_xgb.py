@@ -12,7 +12,7 @@ pd.options.display.max_columns = None
 import matplotlib.pyplot as plt
 
 
-# All usable features
+# all usable features
 features = [
     'state_t_0', 'state_t_1', 'state_t_2', 'state_t_3', 'state_t_4', 'state_t_5', 'state_t_6', 'state_t_7', 'state_t_8', 'state_t_9', 'state_t_10', 'state_t_11', 'state_t_12', 'state_t_13', 'state_t_14', 'state_t_15', 'state_t_16', 'state_t_17', 'state_t_18', 'state_t_19', 'state_t_20', 'state_t_21', 'state_t_22', 'state_t_23', 'state_t_24', 'state_t_25', 'state_t_26', 'state_t_27', 'state_t_28', 'state_t_29', 'state_t_30', 'state_t_31', 'state_t_32', 'state_t_33', 'state_t_34', 'state_t_35', 'state_t_36', 'state_t_37', 'state_t_38', 'state_t_39', 'state_t_40', 'state_t_41', 'state_t_42', 'state_t_43', 'state_t_44', 'state_t_45', 'state_t_46', 'state_t_47', 'state_t_48', 'state_t_49', 'state_t_50', 'state_t_51', 'state_t_52', 'state_t_53', 'state_t_54', 'state_t_55', 'state_t_56', 'state_t_57', 'state_t_58', 'state_t_59',
     'state_q0001_0', 'state_q0001_1', 'state_q0001_2', 'state_q0001_3', 'state_q0001_4', 'state_q0001_5', 'state_q0001_6', 'state_q0001_7', 'state_q0001_8', 'state_q0001_9', 'state_q0001_10', 'state_q0001_11', 'state_q0001_12', 'state_q0001_13', 'state_q0001_14', 'state_q0001_15', 'state_q0001_16', 'state_q0001_17', 'state_q0001_18', 'state_q0001_19', 'state_q0001_20', 'state_q0001_21', 'state_q0001_22', 'state_q0001_23', 'state_q0001_24', 'state_q0001_25', 'state_q0001_26', 'state_q0001_27', 'state_q0001_28', 'state_q0001_29', 'state_q0001_30', 'state_q0001_31', 'state_q0001_32', 'state_q0001_33', 'state_q0001_34', 'state_q0001_35', 'state_q0001_36', 'state_q0001_37', 'state_q0001_38', 'state_q0001_39', 'state_q0001_40', 'state_q0001_41', 'state_q0001_42', 'state_q0001_43', 'state_q0001_44', 'state_q0001_45', 'state_q0001_46', 'state_q0001_47', 'state_q0001_48', 'state_q0001_49', 'state_q0001_50', 'state_q0001_51', 'state_q0001_52', 'state_q0001_53', 'state_q0001_54', 'state_q0001_55', 'state_q0001_56', 'state_q0001_57', 'state_q0001_58', 'state_q0001_59',
@@ -73,11 +73,17 @@ print("# Targets Labels:", len(targets))
 # Load data
 train_files = sorted(glob("./../data/train_batch/*.parquet"))
 test_files = glob("./../data/test_batch/*.parquet")
+
+# split data & downcast to float 32
 train = pd.read_parquet(train_files[1]).astype('float32')
 valid = pd.read_parquet(train_files[-1]).astype('float32')
 test = pd.read_parquet(test_files[0]).astype('float32')
 
-print(train.shape, valid.shape, test.shape)
+print(f'''
+train shape: {train.shape}, 
+validation shape{valid.shape}, 
+test shape: {test.shape}
+''')
 
 # Parameters
 xgb_params = {
@@ -85,15 +91,15 @@ xgb_params = {
     'max_depth': 8,
     'subsample': 0.40,
     'colsample_bytree': 0.95,
-	'device': 'cuda',
-    'objective': 'reg:squarederror'
+    'device': 'cuda',
+    'objective': 'reg:squarederror'  # this means its a regression problem
 }
 
-# Initialize dictionaries to store predictions and actuals
+# initialize dictionaries to store predictions and actuals
 predictions = {}
 actuals = {}
 
-# Train and predict for each target
+# train and predict for each target
 for tnum, target in tqdm(enumerate(targets), desc="Training models for each target"):
 
     dtrain = xgb.DMatrix(train[features], label=train[target])
@@ -110,30 +116,29 @@ for tnum, target in tqdm(enumerate(targets), desc="Training models for each targ
         verbose_eval=False
     )
 
-    # Prediction and storing results
+    # prediction and storing results
     valid_preds = model.predict(dvalid)
     predictions[target] = valid_preds
     actuals[target] = valid[target].values
 
-    # Print current target and R2 score for clarity
+    # print current target and R2 score for clarity
     current_r2 = r2_score(actuals[target], predictions[target])
     print(f"Completed {target}: R2 Score = {current_r2:.4f}")
 
-# Calculate R2 for each target and store final scores
+# calculate R2 for each target and store final scores
 r2_scores = {target: r2_score(actuals[target], predictions[target]) for target in targets}
 
-# Calculate mean R2 score across all targets
+# calculate mean R2 score across all targets
 final_validation_scores = pd.Series(r2_scores).mean()
 print(f"Final validation R2 score: {final_validation_scores:.4f}")
 
-# Convert predictions dict to DataFrame if needed
+# convert predictions dict to DataFrame if needed
 valid['predictions'] = pd.DataFrame(predictions)
 
-# Save results to parquet
+# save results to parquet
 valid.to_parquet(f'validation_{final_validation_scores:.4f}.parquet')
 test.to_csv('test_predictions.csv', index=False)
 
-# Cleanup
+# cleanup
 del train, valid, test
 gc.collect()
-
